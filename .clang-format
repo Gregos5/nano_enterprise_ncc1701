@@ -1,0 +1,32 @@
+---
+# Base Language & Style Options
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Code Formatting & Layout Options
+ColumnLimit: 100
+PointerAlignment: Right
+
+# Alignment Options
+AlignConsecutiveAssignments: true
+AlignConsecutiveMacros: true
+AlignOperands: Align
+AlignTrailingComments: true
+
+# Indentation Options
+IndentWidth: 4
+UseTab: Never
+IndentCaseLabels: true
+IndentCaseBlocks: true
+
+# Brace Handling & Insertions
+BreakBeforeBraces: Allman
+InsertBraces: true
+
+# Spacing Options
+SpaceAfterCStyleCast: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+
+# Code Organization Options
+SortIncludes: true
