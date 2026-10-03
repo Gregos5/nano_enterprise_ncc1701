@@ -173,7 +173,7 @@ static const cal_led_channel_t s_cal_led_channels[CAL_LED_CHANNEL_COUNT] = {
     { CAL_PIN_LED_WINGS,         5000,    20,  20,         0,      2000 },
     { CAL_PIN_LED_RED_ALERT,     2000,     0,  100,      500,         0 },
     { CAL_PIN_LED_SAUCER,        1000,   100,  100,         0,         0 },
-    { CAL_PIN_LED_BRIDGE,       10000,    4,  80,      2000,         0 }
+    { CAL_PIN_LED_BRIDGE,       10000,    2,  80,      2000,         0 }
 };
 /* clang-format on */
 
@@ -214,13 +214,13 @@ static const uint8_t s_cal_led_scene_masks[CAL_LED_SCENE_COUNT] = {
 /* -- Red alert levels ---------------------------------------------------- */
 /* These override the channel's own calibration while the red alert scene is
  * active; the normal scene keeps the values in the table above. */
-/* Wings hold at this brightness (percent of full PWM). */
-#define CAL_RED_ALERT_WINGS_PERCENT ((uint8_t) 10)
-/* Saucer's base brightness. On top of it the saucer flickers fully off and on
- * at random intervals, so it reads as a fault rather than a steady light. */
-#define CAL_RED_ALERT_SAUCER_PERCENT ((uint8_t) 20)
-/* Each saucer flicker state lasts a random time in this range. */
-#define CAL_RED_ALERT_SAUCER_FLICKER_MIN_MS ((uint16_t) 30)
-#define CAL_RED_ALERT_SAUCER_FLICKER_MAX_MS ((uint16_t) 400)
+/* The wings and saucer both fade up to the high level, then flicker at random
+ * intervals between the high and low levels, so they read as a fault rather
+ * than a steady light. */
+#define CAL_RED_ALERT_FLICKER_HIGH_PERCENT ((uint8_t) 4)
+#define CAL_RED_ALERT_FLICKER_LOW_PERCENT  ((uint8_t) 1)
+/* Each flicker state lasts a random time in this range. */
+#define CAL_RED_ALERT_SAUCER_FLICKER_MIN_MS ((uint16_t) 20)
+#define CAL_RED_ALERT_SAUCER_FLICKER_MAX_MS ((uint16_t) 200)
 
 #endif /* CALIBRATION_H */

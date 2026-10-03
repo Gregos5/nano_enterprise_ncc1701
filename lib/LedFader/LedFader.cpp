@@ -108,8 +108,10 @@ static uint32_t led_fader_rise_step_q16(const led_fader_state_t *state);
 static void led_fader_advance_breathing(uint8_t index, unsigned long now_ms);
 static bool led_fader_is_hold(uint8_t index);
 static uint32_t led_fader_target_q16(uint8_t index);
+static uint32_t led_fader_flicker_low_q16(void);
 static bool led_fader_approach_target(led_fader_state_t *state, uint32_t target_q16);
 static void led_fader_advance_flicker(uint8_t index, unsigned long now_ms);
+static bool led_fader_flickers(uint8_t index);
 static bool led_fader_advance_off(led_fader_state_t *state);
 static void led_fader_write(led_fader_state_t *state, uint8_t pin);
 
@@ -161,7 +163,7 @@ void led_fader_update(void)
     {
         if ((s_scene_mask & CAL_LED_CHANNEL_BIT(index)) != 0U)
         {
-            if ((s_scene == LED_FADER_SCENE_RED_ALERT) && (index == CAL_LED_CHANNEL_SAUCER))
+            if (led_fader_flickers(index))
             {
                 led_fader_advance_flicker(index, now_ms);
                 work_remains = true;
@@ -452,19 +454,21 @@ static uint32_t led_fader_target_q16(uint8_t index)
 {
     uint8_t percent = s_cal_led_channels[index].max_percent;
 
-    if (s_scene == LED_FADER_SCENE_RED_ALERT)
+    if (led_fader_flickers(index))
     {
-        if (index == CAL_LED_CHANNEL_WINGS)
-        {
-            percent = CAL_RED_ALERT_WINGS_PERCENT;
-        }
-        else if (index == CAL_LED_CHANNEL_SAUCER)
-        {
-            percent = CAL_RED_ALERT_SAUCER_PERCENT;
-        }
+        percent = CAL_RED_ALERT_FLICKER_HIGH_PERCENT;
     }
 
     return ((uint32_t) ((percent * CAL_LED_PWM_MAX) / 100U)) << LED_FADER_Q16_SHIFT;
+}
+
+/**
+ * @brief The low flicker level as Q16, so a flicker never drops to fully off.
+ */
+static uint32_t led_fader_flicker_low_q16(void)
+{
+    return ((uint32_t) ((CAL_RED_ALERT_FLICKER_LOW_PERCENT * CAL_LED_PWM_MAX) / 100U))
+           << LED_FADER_Q16_SHIFT;
 }
 
 /**
@@ -496,8 +500,18 @@ static bool led_fader_approach_target(led_fader_state_t *state, uint32_t target_
 }
 
 /**
- * @brief Saucer during red alert: fade up to its base level, then flicker fully
- *        off and on at random intervals.
+ * @brief True for a channel that flickers in the current scene: the wings and
+ *        saucer during red alert.
+ */
+static bool led_fader_flickers(uint8_t index)
+{
+    return (s_scene == LED_FADER_SCENE_RED_ALERT) &&
+           ((index == CAL_LED_CHANNEL_WINGS) || (index == CAL_LED_CHANNEL_SAUCER));
+}
+
+/**
+ * @brief Red alert wings and saucer: fade up to the high level, then flicker
+ *        between the high and low levels at random intervals.
  */
 static void led_fader_advance_flicker(uint8_t index, unsigned long now_ms)
 {
@@ -523,7 +537,7 @@ static void led_fader_advance_flicker(uint8_t index, unsigned long now_ms)
                                               CAL_RED_ALERT_SAUCER_FLICKER_MAX_MS + 1);
     }
 
-    state->level_q16 = state->flicker_on ? target_q16 : 0U;
+    state->level_q16 = state->flicker_on ? target_q16 : led_fader_flicker_low_q16();
 }
 
 /**
