@@ -78,9 +78,7 @@ static void dispatch_power_toggle(void)
 
         case POWER_TOGGLE_TURNED_RED_ALERT:
             led_fader_set_scene(LED_FADER_SCENE_RED_ALERT);
-            /* No red-alert chirp of its own yet -- acknowledge the hold with the
-             * power-on sequence so the 3 s threshold is audibly confirmed. */
-            chirp_notifier_play(CHIRP_SEQUENCE_ON);
+            chirp_notifier_play(CHIRP_SEQUENCE_RED_ALERT);
             break;
 
         case POWER_TOGGLE_TURNED_OFF:
